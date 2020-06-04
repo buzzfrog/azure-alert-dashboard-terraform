@@ -119,3 +119,7 @@ resource "azurerm_monitor_metric_alert" "alert_5xx_http" {
     action_group_id = azurerm_monitor_action_group.main.id
   }
 }
+
+output "sql_server_password" {
+  value = azurerm_sql_server.sql_server.administrator_login_password
+}
