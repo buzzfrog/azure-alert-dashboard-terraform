@@ -8,11 +8,10 @@ The full example contains a azure pipeline definition so it can be executed as a
 ## Complete flow of execution
 ### azure-pipelines
 1. Create Resource Group and Storage Account to save Terraform State file.
-2. Install Terraform on build agent
-3. Initialize Terraform with backend in Azure
-4. Set some environment variables
-5. Do Terraform Plan
-6. Do Terraform Apply
+2. Initialize Terraform with backend in Azure
+3. Set some environment variables
+4. Do Terraform Plan
+5. Do Terraform Apply
 
 ### Terraform
 1. Create an App Service and a SQL Database to have something to show in the Dashboard.
