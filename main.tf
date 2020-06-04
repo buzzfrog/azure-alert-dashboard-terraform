@@ -11,13 +11,21 @@ data "azurerm_resource_group" "rg" {
     name = var.rg_name
 }
 
+resource "random_password" "password" {
+  length = 16
+  special = true
+  override_special = "_%@"
+}
+
 resource "azurerm_sql_server" "sql_server" {
   name                         = "sql-server-${var.name}"
   resource_group_name          = var.rg_name
   location                     = var.rg_location
   version                      = "12.0"
+  # Never use this login and password in real code
+  # It's only set in this example to make it easier to run
   administrator_login          = "4dm1n157r470r"
-  administrator_login_password = "4-v3ry-53cr37-p455w0rd"
+  administrator_login_password = random_password.password.result
 }
 
 resource "azurerm_sql_database" "sql_database" {
