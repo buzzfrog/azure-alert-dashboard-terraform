@@ -3,6 +3,8 @@ This is an example to show how Infrastructure as Code (IaC) can be used to creat
 
 The full example contains a azure pipeline definition so it can be executed as a pipeline in Azure DevOps. If used, a Service Connection in Azure DevOps needs to be created with the name **MySubscription**.
 
+![Dashboard](/images/dashboard.png)
+
 ## Complete flow of execution
 ### azure-pipelines
 1. Create Resource Group and Storage Account to save Terraform State file.
