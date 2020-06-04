@@ -1,0 +1,64 @@
+trigger:
+    none 
+    
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  name: "ants"
+  rgLocation: "westeurope"
+
+steps:
+  - task: AzureCLI@2
+    displayName: Ensure Azure Storage backend for Terraform
+    inputs:
+      azureSubscription: MySubscription
+      scriptType: bash
+      scriptLocation: inlineScript
+      addSpnToEnvironment: true
+      useGlobalConfig: true
+      inlineScript: |
+        source create-account-for-tf-state.sh
+        echo "##vso[task.setvariable variable=tfBackendRg]$RESOURCE_GROUP"
+        echo "##vso[task.setvariable variable=tfBackendAccount]$STORAGE_ACCOUNT"
+        echo "##vso[task.setvariable variable=tfBackendContainer]$CONTAINER"
+
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+    displayName: Install Terraform
+    inputs:
+      terraformVersion: 0.12.24
+  
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+    displayName: Initialize Terraform template
+    inputs:
+      command: init
+      backendServiceArm: MySubscription
+      backendAzureRmResourceGroupName: $(tfBackendRg)
+      backendAzureRmStorageAccountName: $(tfBackendAccount)
+      backendAzureRmContainerName: $(tfBackendContainer)
+      backendAzureRmKey: terraform.tfstate
+
+  - bash: |
+      TF_VARS="-var=name=$(name) \
+        -var=rg_location=$(rgLocation) \
+        -var=rg_name=$(tfBackendRg)"
+
+      echo "##vso[task.setvariable variable=tfVars]-lock-timeout=5m $TF_VARS"
+    displayName: Set Terraform Variables
+
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+    displayName: Plan Terraform template
+    inputs:
+      command: plan
+      commandOptions: $(tfVars)
+      environmentServiceNameAzureRM: MySubscription
+
+  - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+    name: applyStep
+    displayName: Apply Terraform template
+    inputs:
+      command: apply
+      commandOptions: $(tfVars)
+      environmentServiceNameAzureRM: MySubscription
+
+  
